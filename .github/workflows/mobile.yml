@@ -1,0 +1,37 @@
+name: Appium Continuous Integration
+
+on:
+  push:
+    branches:
+      - '**'
+jobs:
+  test:
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        api-level: [29]
+        target: [default]
+        # target: [google_apis]
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+
+      - name: run tests
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: ${{ matrix.api-level }}
+          target: ${{ matrix.target }}
+          arch: x86_64
+          profile: Nexus 6
+          script: ./gradlew connectedCheck
+
+      - name: Use Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: 16.x
+
+      - run: npm install
+        name: Install dependencies
+        
+      - run: npm run runappium
+        name: Running E2E tests
